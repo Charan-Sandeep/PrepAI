@@ -1,0 +1,48 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+    <title>AI Interview - Authentication</title>
+</head>
+
+<body>
+
+    <div id="authPage">
+
+        <h1>Create Account</h1>
+
+        <input type="email" id="signupEmail" placeholder="Email">
+
+        <input type="password" id="signupPassword" placeholder="Password">
+
+        <button onclick="createAccount()">
+            Create Account
+        </button>
+
+
+        <h1>Login</h1>
+
+        <input type="email" id="loginEmail" placeholder="Email">
+
+        <input type="password" id="loginPassword" placeholder="Password">
+
+        <button onclick="login()">
+            Login
+        </button>
+
+    </div>
+
+
+    <!-- Message shown after successful operation -->
+    <div id="message"></div>
+
+
+    <!-- Supabase -->
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+
+    <!-- Your JavaScript -->
+    <script src="script.js"></script>
+
+</body>
+
+</html>

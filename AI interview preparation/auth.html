@@ -1,0 +1,658 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Sign in · PrepAI</title>
+  <meta name="description" content="Sign in to PrepAI or create an account to begin your AI-powered interview preparation journey.">
+
+  <!-- Google Fonts — Instrument Sans, Instrument Serif, JetBrains Mono (matching Next.js homepage) -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Instrument+Sans:ital,wght@0,400;0,500;0,600;0,700;1,400&family=Instrument+Serif&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+
+  <style>
+    /* ============================================================
+       DESIGN TOKENS — mirroring the Next.js homepage globals.css
+       ============================================================ */
+    :root {
+      /* Light mode */
+      --bg:            #f9f8f5;
+      --bg-panel:      #ffffff;
+      --fg:            #1a1714;
+      --fg-muted:      #6b6560;
+      --border:        #dedad5;
+      --input-bg:      #f3f1ee;
+      --btn-bg:        #1a1714;
+      --btn-fg:        #f9f8f5;
+      --btn-hover-bg:  #2d2a26;
+      --ring:          rgba(26,23,20,0.18);
+      --err:           #dc2626;
+      --err-bg:        #fef2f2;
+      --err-border:    #fecaca;
+      --ok:            #16a34a;
+      --ok-bg:         #f0fdf4;
+      --ok-border:     #bbf7d0;
+      --radius-sm:     8px;
+      --radius-full:   9999px;
+      --transition:    0.25s cubic-bezier(0.4,0,0.2,1);
+    }
+
+    html.dark {
+      --bg:           #0B0F19;
+      --bg-panel:     #161D2D;
+      --fg:           #F9FAFB;
+      --fg-muted:     #9CA3AF;
+      --border:       #273244;
+      --input-bg:     #111827;
+      --btn-bg:       #F9FAFB;
+      --btn-fg:       #0B0F19;
+      --btn-hover-bg: #e5e7eb;
+      --ring:         rgba(59,130,246,0.35);
+      --err:          #ef4444;
+      --err-bg:       #1c0a0a;
+      --err-border:   #7f1d1d;
+      --ok:           #22c55e;
+      --ok-bg:        #052e16;
+      --ok-border:    #14532d;
+    }
+
+    /* ============================================================
+       GLOBAL RESET & BASE
+       ============================================================ */
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    html { color-scheme: light; scroll-behavior: smooth; }
+    html.dark { color-scheme: dark; }
+
+    html.theme-transition,
+    html.theme-transition *,
+    html.theme-transition *::before,
+    html.theme-transition *::after {
+      transition:
+        background-color 0.3s cubic-bezier(0.4,0,0.2,1),
+        border-color     0.3s cubic-bezier(0.4,0,0.2,1),
+        color            0.3s cubic-bezier(0.4,0,0.2,1),
+        fill             0.3s cubic-bezier(0.4,0,0.2,1),
+        box-shadow       0.3s cubic-bezier(0.4,0,0.2,1) !important;
+      transition-delay: 0s !important;
+    }
+
+    body {
+      min-height: 100vh;
+      background-color: var(--bg);
+      color: var(--fg);
+      font-family: 'Instrument Sans', system-ui, -apple-system, sans-serif;
+      font-size: 15px;
+      line-height: 1.6;
+      display: grid;
+      grid-template-rows: auto 1fr auto;
+      transition: background-color var(--transition), color var(--transition);
+    }
+
+    a { color: inherit; text-decoration: none; }
+    [hidden] { display: none !important; }
+
+    /* ============================================================
+       HEADER
+       ============================================================ */
+    .site-header {
+      border-bottom: 1px solid var(--border);
+      transition: border-color var(--transition);
+    }
+    .site-header-inner {
+      max-width: 1200px;
+      margin: 0 auto;
+      padding: 0 24px;
+      height: 64px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+    }
+
+    .brand {
+      display: inline-flex;
+      align-items: baseline;
+      gap: 5px;
+      font-family: 'Instrument Serif', Georgia, serif;
+      font-size: 22px;
+      letter-spacing: -0.01em;
+      color: var(--fg);
+      transition: color var(--transition);
+    }
+    .brand:hover { opacity: 0.75; }
+    .brand-sub {
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 10px;
+      color: var(--fg-muted);
+      margin-top: 2px;
+    }
+
+    .header-right {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+    }
+
+    .back-link {
+      font-size: 13px;
+      color: var(--fg-muted);
+      transition: color var(--transition);
+    }
+    .back-link:hover { color: var(--fg); }
+
+    .theme-btn {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      width: 34px;
+      height: 34px;
+      border: 1px solid var(--border);
+      border-radius: var(--radius-full);
+      background: transparent;
+      color: var(--fg-muted);
+      cursor: pointer;
+      transition: border-color var(--transition), color var(--transition), background-color var(--transition);
+    }
+    .theme-btn:hover { border-color: var(--fg); color: var(--fg); background-color: var(--input-bg); }
+    .theme-btn:focus-visible { outline: 2px solid var(--fg); outline-offset: 2px; }
+    .theme-btn svg { width: 14px; height: 14px; }
+    .theme-btn .icon-sun  { display: block; }
+    .theme-btn .icon-moon { display: none; }
+    html.dark .theme-btn .icon-sun  { display: none; }
+    html.dark .theme-btn .icon-moon { display: block; }
+
+    /* ============================================================
+       MAIN — two-column layout on wide screens
+       ============================================================ */
+    main {
+      display: grid;
+      grid-template-columns: 1fr;
+      align-items: stretch;
+    }
+    @media (min-width: 900px) {
+      main { grid-template-columns: 1fr 1fr; }
+    }
+
+    /* ============================================================
+       LEFT PANEL — brand messaging
+       ============================================================ */
+    .brand-panel {
+      display: none;
+      position: relative;
+      overflow: hidden;
+      padding: 64px 56px;
+      background-color: var(--fg);
+      flex-direction: column;
+      justify-content: space-between;
+      transition: background-color var(--transition);
+    }
+    @media (min-width: 900px) { .brand-panel { display: flex; } }
+
+    /* Subtle grid overlay — mirrors hero-section.tsx */
+    .brand-panel::before {
+      content: '';
+      position: absolute;
+      inset: 0;
+      background-image:
+        repeating-linear-gradient(to right,  rgba(255,255,255,0.04) 0px, rgba(255,255,255,0.04) 1px, transparent 1px, transparent calc(100%/12)),
+        repeating-linear-gradient(to bottom, rgba(255,255,255,0.04) 0px, rgba(255,255,255,0.04) 1px, transparent 1px, transparent calc(100%/8));
+      pointer-events: none;
+    }
+
+    .brand-panel-content {
+      position: relative;
+      z-index: 1;
+      display: flex;
+      flex-direction: column;
+      justify-content: space-between;
+      height: 100%;
+      gap: 48px;
+      animation: fadeUp 0.7s cubic-bezier(0.22,1,0.36,1) both;
+    }
+
+    .brand-eyebrow {
+      display: inline-flex;
+      align-items: center;
+      gap: 12px;
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 11px;
+      color: rgba(255,255,255,0.45);
+      margin-bottom: 28px;
+    }
+    /* In dark mode, --fg = #F9FAFB (near-white), so the brand panel
+       background becomes near-white. Text overrides must use dark tones
+       with sufficient opacity to be legible on that light surface. */
+    html.dark .brand-eyebrow { color: rgba(15,20,35,0.55); }
+    .brand-eyebrow-line { display: inline-block; width: 28px; height: 1px; background: rgba(255,255,255,0.25); }
+    html.dark .brand-eyebrow-line { background: rgba(15,20,35,0.3); }
+
+    .brand-headline {
+      font-family: 'Instrument Serif', Georgia, serif;
+      font-size: clamp(1.9rem, 3.2vw, 3rem);
+      line-height: 1.02;
+      letter-spacing: -0.02em;
+      color: #fff;
+    }
+    html.dark .brand-headline { color: #0B0F19; }
+
+    .brand-desc {
+      margin-top: 18px;
+      font-size: 14px;
+      line-height: 1.75;
+      color: rgba(255,255,255,0.6);
+      max-width: 340px;
+    }
+    html.dark .brand-desc { color: rgba(15,20,35,0.65); }
+
+    .brand-stats { display: flex; flex-direction: column; gap: 22px; }
+
+    .brand-stat { display: flex; align-items: baseline; gap: 12px; }
+
+    .brand-stat-value {
+      font-family: 'Instrument Serif', Georgia, serif;
+      font-size: 2.4rem;
+      line-height: 1;
+      color: #fff;
+    }
+    html.dark .brand-stat-value { color: #0B0F19; }
+
+    .brand-stat-label { font-size: 13px; color: rgba(255,255,255,0.55); }
+    html.dark .brand-stat-label { color: rgba(15,20,35,0.65); }
+
+    .brand-stat-sub {
+      display: block;
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 10px;
+      margin-top: 2px;
+      color: rgba(255,255,255,0.35);
+    }
+    html.dark .brand-stat-sub { color: rgba(15,20,35,0.45); }
+
+    .brand-footer-text {
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 11px;
+      color: rgba(255,255,255,0.3);
+    }
+    html.dark .brand-footer-text { color: rgba(15,20,35,0.4); }
+
+    /* ============================================================
+       RIGHT PANEL — auth form
+       ============================================================ */
+    .auth-panel {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      padding: 48px 24px;
+      background-color: var(--bg);
+      transition: background-color var(--transition);
+    }
+    @media (min-width: 900px) { .auth-panel { padding: 64px 56px; } }
+
+    .auth-panel-inner {
+      width: 100%;
+      max-width: 400px;
+      animation: fadeUp 0.55s cubic-bezier(0.22,1,0.36,1) both;
+    }
+
+    /* ============================================================
+       AUTH CARD (#authPage is the target of script.js)
+       ============================================================ */
+    #authPage { width: 100%; }
+
+    .eyebrow {
+      display: inline-flex;
+      align-items: center;
+      gap: 10px;
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 11px;
+      letter-spacing: 0.1em;
+      text-transform: uppercase;
+      color: var(--fg-muted);
+      margin-bottom: 14px;
+      transition: color var(--transition);
+    }
+    .eyebrow-line { display: inline-block; width: 22px; height: 1px; background: var(--border); }
+
+    #formTitle {
+      font-family: 'Instrument Serif', Georgia, serif;
+      font-size: clamp(1.85rem, 4vw, 2.5rem);
+      line-height: 1.05;
+      letter-spacing: -0.02em;
+      color: var(--fg);
+      margin-bottom: 6px;
+      transition: color var(--transition);
+    }
+
+    #formSubtitle {
+      font-size: 14px;
+      color: var(--fg-muted);
+      line-height: 1.65;
+      margin-bottom: 30px;
+      transition: color var(--transition);
+    }
+
+    /* ============================================================
+       TAB SWITCHER
+       ============================================================ */
+    .switch {
+      display: flex;
+      border-bottom: 1px solid var(--border);
+      margin-bottom: 26px;
+      transition: border-color var(--transition);
+    }
+    .switch a {
+      padding: 0 4px 11px;
+      margin-right: 18px;
+      font-size: 13px;
+      font-weight: 500;
+      color: var(--fg-muted);
+      border-bottom: 2px solid transparent;
+      margin-bottom: -1px;
+      cursor: pointer;
+      transition: color var(--transition), border-color var(--transition);
+      user-select: none;
+    }
+    .switch a:hover { color: var(--fg); }
+    .switch a[aria-current="page"] {
+      color: var(--fg);
+      border-bottom-color: var(--fg);
+    }
+
+    /* ============================================================
+       FORM FIELDS
+       ============================================================ */
+    form { display: grid; gap: 14px; }
+
+    label {
+      display: grid;
+      gap: 6px;
+      font-size: 13px;
+      font-weight: 500;
+      color: var(--fg-muted);
+      transition: color var(--transition);
+    }
+
+    input[type="email"],
+    input[type="password"],
+    input[type="text"] {
+      width: 100%;
+      height: 44px;
+      padding: 0 14px;
+      border: 1px solid var(--border);
+      border-radius: var(--radius-sm);
+      background: var(--input-bg);
+      color: var(--fg);
+      font-family: 'Instrument Sans', sans-serif;
+      font-size: 14px;
+      outline: none;
+      -webkit-appearance: none;
+      transition: border-color var(--transition), background-color var(--transition), box-shadow var(--transition);
+    }
+    input::placeholder { color: var(--fg-muted); opacity: 0.5; }
+    input:hover { border-color: color-mix(in srgb, var(--fg) 28%, var(--border)); }
+    input:focus { border-color: var(--fg); box-shadow: 0 0 0 3px var(--ring); }
+
+    /* ============================================================
+       SUBMIT BUTTON
+       ============================================================ */
+    button[type="submit"] {
+      width: 100%;
+      height: 44px;
+      padding: 0 20px;
+      margin-top: 4px;
+      border: none;
+      border-radius: var(--radius-full);
+      background: var(--btn-bg);
+      color: var(--btn-fg);
+      font-family: 'Instrument Sans', sans-serif;
+      font-size: 14px;
+      font-weight: 600;
+      letter-spacing: 0.01em;
+      cursor: pointer;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      gap: 8px;
+      transition: background-color var(--transition), transform 0.15s ease;
+    }
+    button[type="submit"]:hover { background: var(--btn-hover-bg); }
+    button[type="submit"]:active { transform: scale(0.98); }
+    button[type="submit"]:focus-visible { outline: 2px solid var(--fg); outline-offset: 2px; }
+    button[type="submit"]:disabled { opacity: 0.55; cursor: not-allowed; transform: none; }
+
+    .btn-arrow { display: inline-flex; align-items: center; transition: transform 0.2s ease; }
+    button[type="submit"]:hover .btn-arrow { transform: translateX(3px); }
+
+    /* ============================================================
+       MESSAGE AREA (#message — used by script.js)
+       ============================================================ */
+    #message {
+      margin-top: 14px;
+      font-size: 13px;
+      line-height: 1.5;
+      border-radius: var(--radius-sm);
+      transition: all var(--transition);
+    }
+    #message:not(:empty) { padding: 12px 14px; }
+    #message.is-error  { background: var(--err-bg); border: 1px solid var(--err-border); color: var(--err); }
+    #message.is-success{ background: var(--ok-bg);  border: 1px solid var(--ok-border);  color: var(--ok);  }
+
+    /* ============================================================
+       FOOTER
+       ============================================================ */
+    .site-footer { border-top: 1px solid var(--border); transition: border-color var(--transition); }
+    .site-footer-inner {
+      max-width: 1200px;
+      margin: 0 auto;
+      padding: 18px 24px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 12px;
+      flex-wrap: wrap;
+    }
+    .site-footer-text { font-family: 'JetBrains Mono', monospace; font-size: 12px; color: var(--fg-muted); transition: color var(--transition); }
+    .footer-status { display: inline-flex; align-items: center; gap: 6px; font-family: 'JetBrains Mono', monospace; font-size: 12px; color: var(--fg-muted); }
+    .footer-status-dot { width: 6px; height: 6px; border-radius: 50%; background: #22c55e; flex-shrink: 0; }
+
+    /* ============================================================
+       ANIMATIONS
+       ============================================================ */
+    @keyframes fadeUp {
+      from { opacity: 0; transform: translateY(16px); }
+      to   { opacity: 1; transform: translateY(0); }
+    }
+
+    /* ============================================================
+       RESPONSIVE
+       ============================================================ */
+    @media (max-width: 480px) {
+      .auth-panel { padding: 32px 16px; }
+      #formTitle { font-size: 1.75rem; }
+    }
+  </style>
+</head>
+<body>
+
+  <!-- HEADER -->
+  <header class="site-header">
+    <div class="site-header-inner">
+      <a class="brand" href="home.html" aria-label="PrepAI — go to homepage">
+        PrepAI<span class="brand-sub">AI</span>
+      </a>
+      <div class="header-right">
+        <a class="back-link" href="home.html">← Back to home</a>
+        <button id="themeToggle" class="theme-btn" type="button" aria-label="Toggle theme" title="Toggle light / dark mode">
+          <svg class="icon-sun" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="4"/><path d="M12 2v2M12 20v2M4.93 4.93l1.41 1.41M17.66 17.66l1.41 1.41M2 12h2M20 12h2M6.34 17.66l-1.41 1.41M19.07 4.93l-1.41 1.41"/></svg>
+          <svg class="icon-moon" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"/></svg>
+        </button>
+      </div>
+    </div>
+  </header>
+
+  <!-- MAIN — two-column -->
+  <main>
+
+    <!-- LEFT: Brand messaging (decorative, aria-hidden) -->
+    <div class="brand-panel" aria-hidden="true">
+      <div class="brand-panel-content">
+        <div>
+          <div class="brand-eyebrow"><span class="brand-eyebrow-line"></span>Your interview practice space</div>
+          <h2 class="brand-headline">Prepare Smarter.<br>Interview Better.</h2>
+          <p class="brand-desc">Practice technical concepts, strengthen your knowledge, and take the next step in your development journey — all in one place.</p>
+        </div>
+        <div class="brand-stats">
+          <div class="brand-stat">
+            <span class="brand-stat-value">500+</span>
+            <span class="brand-stat-label">curated questions<span class="brand-stat-sub">TECH TOPICS</span></span>
+          </div>
+          <div class="brand-stat">
+            <span class="brand-stat-value">10+</span>
+            <span class="brand-stat-label">developer roadmaps<span class="brand-stat-sub">CAREER PATHS</span></span>
+          </div>
+          <div class="brand-stat">
+            <span class="brand-stat-value">AI</span>
+            <span class="brand-stat-label">instant MCQ generation<span class="brand-stat-sub">REAL-TIME</span></span>
+          </div>
+        </div>
+        <p class="brand-footer-text">Build confidence one question at a time.</p>
+      </div>
+    </div>
+
+    <!-- RIGHT: Auth form -->
+    <div class="auth-panel">
+      <div class="auth-panel-inner">
+
+        <!-- script.js targets #authPage and wipes its innerHTML on success -->
+        <section id="authPage">
+          <div class="eyebrow"><span class="eyebrow-line"></span>PrepAI</div>
+          <h1 id="formTitle">Welcome back.</h1>
+          <p id="formSubtitle">Continue your journey toward interview readiness.</p>
+
+          <!-- Tab nav — IDs and aria-current preserved exactly -->
+          <nav class="switch" aria-label="Authentication options">
+            <a id="loginTab" href="#login" aria-current="page">Sign In</a>
+            <a id="signupTab" href="#signup">Create Account</a>
+          </nav>
+
+          <!-- LOGIN FORM — id, onsubmit, field IDs all preserved -->
+          <form id="loginForm" onsubmit="event.preventDefault(); login();" novalidate>
+            <label for="loginEmail">Email address
+              <input type="email" id="loginEmail" name="email" placeholder="you@example.com" autocomplete="email" required>
+            </label>
+            <label for="loginPassword">Password
+              <input type="password" id="loginPassword" name="password" placeholder="Your password" autocomplete="current-password" required>
+            </label>
+            <button type="submit">
+              Sign In
+              <span class="btn-arrow" aria-hidden="true"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h14M12 5l7 7-7 7"/></svg></span>
+            </button>
+          </form>
+
+          <!-- SIGNUP FORM — id, onsubmit, field IDs all preserved -->
+          <form id="signupForm" hidden onsubmit="event.preventDefault(); createAccount();" novalidate>
+            <label for="signupEmail">Email address
+              <input type="email" id="signupEmail" name="email" placeholder="you@example.com" autocomplete="email" required>
+            </label>
+            <label for="signupPassword">Password
+              <input type="password" id="signupPassword" name="password" placeholder="Create a password" autocomplete="new-password" required>
+            </label>
+            <button type="submit">
+              Create Account
+              <span class="btn-arrow" aria-hidden="true"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h14M12 5l7 7-7 7"/></svg></span>
+            </button>
+          </form>
+        </section>
+
+        <!-- Message area — script.js targets #message -->
+        <div id="message" role="status" aria-live="polite"></div>
+
+      </div>
+    </div>
+
+  </main>
+
+  <!-- FOOTER -->
+  <footer class="site-footer">
+    <div class="site-footer-inner">
+      <span class="site-footer-text">© 2025 PrepAI. All rights reserved.</span>
+      <span class="footer-status"><span class="footer-status-dot"></span>All systems operational</span>
+    </div>
+  </footer>
+
+  <!-- TAB SWITCHING + THEME TOGGLE + MESSAGE CLASSIFIER -->
+  <script>
+    /* ----- Tab switching (logic preserved, text updated) ----- */
+    const loginTab  = document.getElementById("loginTab");
+    const signupTab = document.getElementById("signupTab");
+    const loginForm  = document.getElementById("loginForm");
+    const signupForm = document.getElementById("signupForm");
+
+    function setMode(mode) {
+      const signup = mode === "signup";
+      loginForm.hidden  = signup;
+      signupForm.hidden = !signup;
+      /* Fix: toggleAttribute sets aria-current="" (no value), but the CSS
+         selector is [aria-current="page"], which requires an explicit value.
+         Use setAttribute/removeAttribute to set "page" correctly. */
+      if (signup) {
+        loginTab.removeAttribute("aria-current");
+        signupTab.setAttribute("aria-current", "page");
+      } else {
+        loginTab.setAttribute("aria-current", "page");
+        signupTab.removeAttribute("aria-current");
+      }
+      document.getElementById("formTitle").textContent    = signup ? "Start your PrepAI journey." : "Welcome back.";
+      document.getElementById("formSubtitle").textContent = signup ? "Build your skills, practice with AI, and prepare for your next opportunity." : "Continue your journey toward interview readiness.";
+    }
+
+    loginTab.addEventListener("click",  e => { e.preventDefault(); history.replaceState(null, "", "#login");  setMode("login"); });
+    signupTab.addEventListener("click", e => { e.preventDefault(); history.replaceState(null, "", "#signup"); setMode("signup"); });
+    setMode(location.hash === "#signup" ? "signup" : "login");
+
+    /* ----- Theme toggle (uses same localStorage key as next-themes) ----- */
+    (function () {
+      var KEY = "theme";
+      var html = document.documentElement;
+      function applyTheme(t) {
+        var dark = t === "dark" || ((!t || t === "system") && window.matchMedia("(prefers-color-scheme: dark)").matches);
+        html.classList.toggle("dark", dark);
+        html.style.colorScheme = dark ? "dark" : "light";
+      }
+      applyTheme(localStorage.getItem(KEY));
+      document.getElementById("themeToggle").addEventListener("click", function () {
+        var isDark = html.classList.contains("dark");
+        html.classList.add("theme-transition");
+        var next = isDark ? "light" : "dark";
+        localStorage.setItem(KEY, next);
+        applyTheme(next);
+        setTimeout(function () { html.classList.remove("theme-transition"); }, 350);
+      });
+      window.matchMedia("(prefers-color-scheme: dark)").addEventListener("change", function () {
+        var stored = localStorage.getItem(KEY);
+        if (!stored || stored === "system") applyTheme("system");
+      });
+    })();
+
+    /* ----- Auto-classify #message for styled error/success display ----- */
+    (function () {
+      var msg = document.getElementById("message");
+      function classify() {
+        var t = msg.textContent.toLowerCase();
+        msg.classList.remove("is-error", "is-success");
+        if (!t) return;
+        if (/fail|error|invalid|incorrect|wrong|denied/.test(t)) msg.classList.add("is-error");
+        else msg.classList.add("is-success");
+      }
+      new MutationObserver(classify).observe(msg, { childList: true, subtree: true, characterData: true });
+    })();
+  </script>
+
+  <!-- Supabase CDN + auth logic — untouched -->
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+  <script src="script.js"></script>
+
+</body>
+</html>

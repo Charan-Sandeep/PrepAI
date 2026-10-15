@@ -1,0 +1,40 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Sign in or create an account · PrepAI</title>
+  <style>
+    :root{color-scheme:dark;--bg:#0b1020;--panel:#121a2c;--muted:#9ba8bf;--text:#f3f6ff;--accent:#a5b0ff;--line:#29344d}
+    *{box-sizing:border-box}body{min-height:100vh;margin:0;display:grid;grid-template-rows:auto 1fr auto;background:radial-gradient(ellipse at 50% 0%,#202d50 0,transparent 50%),var(--bg);color:var(--text);font:16px/1.5 system-ui,-apple-system,"Segoe UI",sans-serif}header,footer{width:min(1040px,calc(100% - 36px));margin:auto}header{height:72px;display:flex;align-items:center;justify-content:space-between;border-bottom:1px solid var(--line)}a{color:var(--accent);text-decoration:none}.brand{color:var(--text);font-weight:750}.brand span{color:var(--accent)}main{width:min(430px,calc(100% - 36px));margin:50px auto;align-self:center}.card{background:rgba(18,26,44,.94);border:1px solid var(--line);border-radius:18px;padding:30px;box-shadow:0 24px 70px #0004}.eyebrow{color:var(--accent);text-transform:uppercase;font-size:12px;font-weight:700;letter-spacing:.14em}h1{font-size:30px;line-height:1.2;margin:10px 0}p{color:var(--muted)}.switch{display:flex;gap:18px;border-bottom:1px solid var(--line);margin:24px 0 20px}.switch a{padding:0 0 11px;color:var(--muted)}.switch a[aria-current="page"]{color:var(--text);border-bottom:2px solid var(--accent)}form{display:grid;gap:14px}[hidden]{display:none!important}label{display:grid;gap:7px;color:var(--muted);font-size:14px}input{width:100%;border:1px solid var(--line);background:#0d1424;color:var(--text);border-radius:9px;padding:12px;font:inherit}input:focus{outline:2px solid #a5b0ff55;border-color:var(--accent)}button{border:0;border-radius:9px;padding:12px;background:var(--accent);color:#10162a;font:inherit;font-weight:750;cursor:pointer;margin-top:4px}#message{color:#c5cdfd;margin-top:16px}footer{border-top:1px solid var(--line);padding:20px 0;color:var(--muted);font-size:13px}@media(max-width:500px){.card{padding:23px}}
+  </style>
+</head>
+<body>
+  <header><a class="brand" href="home.html">Prep<span>AI</span></a></header>
+  <main><section class="card" id="authPage"><div class="eyebrow">Your interview practice space</div><h1 id="formTitle">Welcome back</h1><p id="formSubtitle">Sign in to continue your preparation.</p>
+    <nav class="switch" aria-label="Authentication options"><a id="loginTab" href="#login" aria-current="page">Log in</a><a id="signupTab" href="#signup">Create account</a></nav>
+    <form id="loginForm" onsubmit="event.preventDefault(); login();"><label for="loginEmail">Email<input type="email" id="loginEmail" placeholder="you@example.com" autocomplete="email" required></label><label for="loginPassword">Password<input type="password" id="loginPassword" placeholder="Your password" autocomplete="current-password" required></label><button type="submit">Log in</button></form>
+    <form id="signupForm" hidden onsubmit="event.preventDefault(); createAccount();"><label for="signupEmail">Email<input type="email" id="signupEmail" placeholder="you@example.com" autocomplete="email" required></label><label for="signupPassword">Password<input type="password" id="signupPassword" placeholder="Create a password" autocomplete="new-password" required></label><button type="submit">Create account</button></form>
+    <div id="message" role="status" aria-live="polite"></div>
+  </section></main>
+  <footer>Build confidence one question at a time.</footer>
+  <script>
+    const loginTab = document.getElementById("loginTab");
+    const signupTab = document.getElementById("signupTab");
+    const loginForm = document.getElementById("loginForm");
+    const signupForm = document.getElementById("signupForm");
+    function setMode(mode) {
+      const signup = mode === "signup";
+      loginForm.hidden = signup; signupForm.hidden = !signup;
+      loginTab.toggleAttribute("aria-current", !signup); signupTab.toggleAttribute("aria-current", signup);
+      document.getElementById("formTitle").textContent = signup ? "Create your account" : "Welcome back";
+      document.getElementById("formSubtitle").textContent = signup ? "Save your place and keep building your interview skills." : "Sign in to continue your preparation.";
+    }
+    loginTab.addEventListener("click", event => { event.preventDefault(); history.replaceState(null, "", "#login"); setMode("login"); });
+    signupTab.addEventListener("click", event => { event.preventDefault(); history.replaceState(null, "", "#signup"); setMode("signup"); });
+    setMode(location.hash === "#signup" ? "signup" : "login");
+  </script>
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+  <script src="script.js"></script>
+</body>
+</html>

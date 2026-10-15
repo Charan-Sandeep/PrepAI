@@ -1,0 +1,135 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Resume Analyzer · PrepAI</title>
+  <style>
+    :root{color-scheme:dark;--bg:#0b1020;--panel:#121a2c;--muted:#9ba8bf;--text:#f3f6ff;--accent:#a5b0ff;--line:#29344d;--good:#75d7a2;--bad:#ff9292}
+    *{box-sizing:border-box}body{margin:0;background:radial-gradient(ellipse at 72% 0%,#202d50 0,transparent 48%),var(--bg);color:var(--text);font:16px/1.5 system-ui,-apple-system,"Segoe UI",sans-serif}header,main{width:min(900px,calc(100% - 36px));margin:auto}header{height:72px;display:flex;align-items:center;justify-content:space-between;border-bottom:1px solid var(--line)}a{color:var(--accent);text-decoration:none}.brand{color:var(--text);font-weight:750}.intro{padding:34px 0 16px}.intro h1{margin:0 0 6px;font-size:32px}.intro p,.hint,.disclaimer{color:var(--muted)}form,.results{border:1px solid var(--line);background:rgba(18,26,44,.92);border-radius:14px;padding:20px;margin:14px 0}form{display:grid;gap:15px}label{display:grid;gap:7px;color:var(--muted);font-size:14px}input,textarea{width:100%;border:1px solid var(--line);background:#0d1424;color:var(--text);border-radius:8px;padding:11px;font:inherit}textarea{min-height:210px;resize:vertical}input:focus,textarea:focus{outline:2px solid var(--accent);outline-offset:1px}button{border:0;border-radius:9px;padding:11px 16px;background:var(--accent);color:#10162a;font:inherit;font-weight:700;cursor:pointer}button:disabled{opacity:.6;cursor:wait}.actions{display:flex;align-items:center;gap:14px;flex-wrap:wrap}.hint{margin:0}.error{color:var(--bad)}.spinner{display:inline-block;width:15px;height:15px;border:2px solid #a5b0ff55;border-top-color:var(--accent);border-radius:50%;animation:spin .8s linear infinite;vertical-align:-3px;margin-right:7px}@keyframes spin{to{transform:rotate(360deg)}}.scores{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:12px}.score{padding:15px;border:1px solid var(--line);border-radius:10px;background:#0d1424}.score span{display:block;color:var(--muted);font-size:13px}.score strong{font-size:30px}.result-grid{display:grid;grid-template-columns:1fr 1fr;gap:20px;margin-top:20px}.result-grid h2{font-size:16px;margin:0 0 8px}.result-grid ul{margin:0;padding-left:20px;color:#dce3f6}.result-grid li+li{margin-top:6px}.message{margin:20px 0 0;padding:14px;border-left:3px solid var(--accent);background:#a5b0ff12;border-radius:4px}.disclaimer{font-size:12px;margin-top:14px}.empty{color:var(--muted);margin:0}[hidden]{display:none!important}@media(max-width:620px){.result-grid{grid-template-columns:1fr}.intro h1{font-size:27px}}body.embedded{background:var(--bg)}body.embedded>header{display:none}body.embedded main{width:100%;padding:0 16px}body.embedded .intro{padding-top:18px}
+  </style>
+</head>
+<body>
+  <header><a class="brand" href="dashboard.html">← Dashboard</a><a href="home.html">Home</a></header>
+  <main>
+    <section class="intro"><h1>Resume Analyzer</h1><p>Get a role-specific readiness and ATS review, with skills to strengthen and a practical learning path.</p></section>
+    <form id="analyze-form">
+      <label for="resume-file">Upload resume (PDF or Word .docx) <input id="resume-file" type="file" accept=".pdf,.docx,application/pdf,application/vnd.openxmlformats-officedocument.wordprocessingml.document"><span class="hint">The file is read in your browser. It is sent to the analyzer only when you submit the form.</span><span id="file-status" class="hint" role="status" aria-live="polite"></span></label>
+      <label for="resume-text">Resume text <textarea id="resume-text" name="resume_text" minlength="50" required placeholder="Upload a PDF or Word document, or paste your resume text here (at least 50 characters)."></textarea></label>
+      <label for="job-role">Target job role <input id="job-role" name="job_role" value="Full Stack Developer" required maxlength="120" placeholder="e.g. Full Stack Developer"></label>
+      <label for="github-url">GitHub profile URL <input id="github-url" name="github_url" type="url" placeholder="https://github.com/username"><span class="hint">Optional. Leave blank if you don't want GitHub recommendations.</span></label>
+      <div class="actions"><button id="analyze-button" type="submit">Analyze resume</button><p id="status" class="hint" role="status" aria-live="polite"></p></div>
+    </form>
+    <section id="results" class="results" aria-labelledby="results-title" hidden>
+      <h2 id="results-title">Your analysis</h2>
+      <div class="scores"><div class="score"><span>Readiness score</span><strong id="readiness-score">—</strong></div><div class="score"><span>ATS score</span><strong id="ats-score">—</strong></div></div>
+      <div class="result-grid">
+        <section><h2>Matched skills</h2><ul id="matched-skills"></ul></section>
+        <section><h2>Skills to build</h2><ul id="missing-skills"></ul></section>
+        <section><h2>Learning path</h2><ul id="learning-path"></ul></section>
+        <section><h2>ATS tips</h2><ul id="ats-tips"></ul></section>
+        <section><h2>GitHub recommendations</h2><ul id="github-recommendations"></ul></section>
+      </div>
+      <p class="message" id="areta-message" hidden></p><p class="disclaimer" id="disclaimer" hidden></p>
+    </section>
+  </main>
+  <script src="https://cdn.jsdelivr.net/npm/pdfjs-dist@3.11.174/build/pdf.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/mammoth@1.9.0/mammoth.browser.min.js"></script>
+  <script>
+    const ANALYZE_ENDPOINT = "https://kushallll.app.n8n.cloud/webhook/levelup-analyze";
+    if (new URLSearchParams(location.search).has("embedded")) document.body.classList.add("embedded");
+    const form = document.getElementById("analyze-form");
+    const button = document.getElementById("analyze-button");
+    const status = document.getElementById("status");
+    const results = document.getElementById("results");
+    const fileInput = document.getElementById("resume-file");
+    const fileStatus = document.getElementById("file-status");
+
+    if (window.pdfjsLib) pdfjsLib.GlobalWorkerOptions.workerSrc = "https://cdn.jsdelivr.net/npm/pdfjs-dist@3.11.174/build/pdf.worker.min.js";
+
+    async function extractPdfText(file) {
+      if (!window.pdfjsLib) throw new Error("The PDF reader could not load. Refresh the page or paste your resume text instead.");
+      const pdf = await pdfjsLib.getDocument({ data: await file.arrayBuffer() }).promise;
+      const pages = [];
+      for (let pageNumber = 1; pageNumber <= pdf.numPages; pageNumber++) {
+        const page = await pdf.getPage(pageNumber);
+        const content = await page.getTextContent();
+        pages.push(content.items.map(item => item.str).join(" "));
+      }
+      return pages.join("\n");
+    }
+
+    async function extractWordText(file) {
+      if (!window.mammoth) throw new Error("The Word reader could not load. Refresh the page or paste your resume text instead.");
+      const extracted = await mammoth.extractRawText({ arrayBuffer: await file.arrayBuffer() });
+      return extracted.value;
+    }
+
+    fileInput.addEventListener("change", async () => {
+      const file = fileInput.files && fileInput.files[0];
+      if (!file) { fileStatus.textContent = ""; return; }
+      fileStatus.className = "hint";
+      fileStatus.innerHTML = '<span class="spinner" aria-hidden="true"></span>Reading your document…';
+      try {
+        const extension = file.name.toLowerCase().split(".").pop();
+        if (extension !== "pdf" && extension !== "docx") throw new Error("Please choose a PDF or Word (.docx) file.");
+        const extractedText = extension === "pdf" ? await extractPdfText(file) : await extractWordText(file);
+        if (extractedText.trim().length < 50) throw new Error("Could not find enough text. This may be a scanned PDF; paste selectable text or use a text-based document.");
+        document.getElementById("resume-text").value = extractedText.trim();
+        fileStatus.textContent = `Text extracted from ${file.name}. Review it below before analysis.`;
+      } catch (error) {
+        console.error("Could not read resume file:", error);
+        fileStatus.className = "hint error";
+        fileStatus.textContent = error.message || "Could not read this document. Please try another file or paste the text.";
+      }
+    });
+
+    function showList(id, values) {
+      const list = document.getElementById(id);
+      list.replaceChildren();
+      if (!Array.isArray(values) || values.length === 0) {
+        const item = document.createElement("li"); item.className = "empty"; item.textContent = "None provided."; list.append(item); return;
+      }
+      values.forEach(value => { const item = document.createElement("li"); item.textContent = String(value); list.append(item); });
+    }
+    function scoreText(value) {
+      const number = Number(value);
+      return Number.isFinite(number) && number >= 0 && number <= 100 ? `${Math.round(number)} / 100` : "Not provided";
+    }
+    function renderAnalysis(data) {
+      document.getElementById("readiness-score").textContent = scoreText(data.readiness_score);
+      document.getElementById("ats-score").textContent = scoreText(data.ats_score);
+      showList("matched-skills", data.matched_skills);
+      showList("missing-skills", data.missing_skills);
+      showList("learning-path", data.learning_path);
+      showList("ats-tips", data.ats_score_improving_tips);
+      showList("github-recommendations", data.github_recommendations);
+      const message = document.getElementById("areta-message");
+      message.textContent = data.areta_message == null ? "" : String(data.areta_message);
+      message.hidden = !message.textContent;
+      const disclaimer = document.getElementById("disclaimer");
+      disclaimer.textContent = data.meta && data.meta.disclaimer ? String(data.meta.disclaimer) : "";
+      disclaimer.hidden = !disclaimer.textContent;
+      results.hidden = false;
+    }
+    form.addEventListener("submit", async event => {
+      event.preventDefault();
+      const resumeText = document.getElementById("resume-text").value.trim();
+      if (resumeText.length < 50) { status.textContent = "Please enter at least 50 characters of resume text."; status.className = "hint error"; return; }
+      button.disabled = true; status.className = "hint"; status.innerHTML = '<span class="spinner" aria-hidden="true"></span>Analyzing your resume. This usually takes 10–25 seconds…'; results.hidden = true;
+      try {
+        const response = await fetch(ANALYZE_ENDPOINT, { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ resume_text: resumeText, job_role: document.getElementById("job-role").value.trim(), github_url: document.getElementById("github-url").value.trim() }) });
+        let data;
+        try { data = await response.json(); } catch { throw new Error(response.ok ? "The analyzer returned an unreadable response." : `Analysis failed (HTTP ${response.status}).`); }
+        if (!response.ok) throw new Error(data?.error?.message || `Analysis failed (HTTP ${response.status}).`);
+        if (!data || typeof data !== "object") throw new Error("The analyzer returned an invalid response.");
+        renderAnalysis(data); status.textContent = "Analysis complete.";
+      } catch (error) {
+        console.error("Resume analysis failed:", error);
+        status.className = "hint error";
+        status.textContent = error instanceof TypeError ? "Could not reach the analyzer. Check your connection and site origin, then try again." : error.message;
+      } finally { button.disabled = false; }
+    });
+  </script>
+</body>
+</html>

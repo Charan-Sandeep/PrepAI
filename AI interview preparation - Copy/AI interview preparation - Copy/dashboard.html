@@ -1,0 +1,128 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Dashboard · PrepAI</title>
+  <style>
+    :root{color-scheme:dark;--bg:#0b1020;--panel:#121a2c;--muted:#9ba8bf;--text:#f3f6ff;--accent:#a5b0ff;--line:#29344d}
+    *{box-sizing:border-box}body{min-height:100vh;margin:0;background:radial-gradient(ellipse at 72% 0%,#202d50 0,transparent 48%),var(--bg);color:var(--text);font:16px/1.5 system-ui,-apple-system,"Segoe UI",sans-serif}header{height:68px;padding:0 max(20px,calc((100vw - 1320px)/2));display:flex;align-items:center;justify-content:space-between;border-bottom:1px solid var(--line);background:#0b1020aa}.brand{color:var(--text);font-weight:750;text-decoration:none}.brand span{color:var(--accent)}.account{display:flex;align-items:center;gap:16px;color:var(--muted);font-size:14px}button{border:1px solid var(--line);border-radius:8px;padding:8px 12px;background:#151e32;color:var(--text);font:inherit;cursor:pointer}button:disabled{opacity:.65;cursor:wait}.layout{width:min(1320px,calc(100% - 32px));min-height:calc(100vh - 124px);margin:22px auto;display:grid;grid-template-columns:248px minmax(0,1fr);gap:18px}.sidebar{align-self:stretch;border:1px solid var(--line);border-radius:14px;background:rgba(18,26,44,.95);padding:18px 12px}.side-label{margin:3px 10px 12px;color:var(--muted);font-size:12px;font-weight:750;letter-spacing:.13em;text-transform:uppercase}.menu{display:grid;gap:6px}.menu a,.menu .future{display:flex;align-items:center;gap:11px;min-height:44px;padding:10px;border-radius:9px;text-decoration:none;color:var(--muted)}.menu a.active{background:#a5b0ff1c;color:var(--text);box-shadow:inset 2px 0 var(--accent)}.menu-icon{width:22px;text-align:center;color:var(--accent)}.future{opacity:.66}.future small{margin-left:auto;color:var(--muted);font-size:11px}.dashboard-content{display:grid;gap:18px;min-width:0}.workspace,.portfolio{min-width:0;border:1px solid var(--line);border-radius:14px;background:rgba(13,20,36,.7);overflow:hidden}.workspace-heading,.portfolio-heading{padding:17px 20px;border-bottom:1px solid var(--line);display:flex;align-items:center;justify-content:space-between}.workspace-heading h1,.portfolio-heading h2{font-size:18px;margin:0}.workspace-heading span,.portfolio-heading span{color:var(--muted);font-size:13px}.module-frame{display:block;width:100%;height:620px;border:0;background:var(--bg)}.portfolio-body{padding:18px 20px}.metrics{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:12px}.metric{padding:14px;border:1px solid var(--line);border-radius:10px;background:#11192b}.metric-label{display:block;color:var(--muted);font-size:12px}.metric-value{display:block;margin-top:5px;font-size:23px;font-weight:750}.portfolio-lists{display:grid;grid-template-columns:1fr 1fr;gap:24px;margin-top:20px}.portfolio-lists h3{font-size:14px;margin:0 0 10px}.portfolio-list{display:grid;gap:8px}.portfolio-row{display:flex;align-items:center;justify-content:space-between;gap:12px;border-bottom:1px solid #29344d88;padding:8px 0;font-size:13px}.portfolio-row span:last-child{color:var(--muted);white-space:nowrap}.empty-portfolio{color:var(--muted);font-size:13px;margin:0}footer{width:min(1320px,calc(100% - 32px));margin:0 auto;padding:14px 0;color:var(--muted);font-size:12px}#auth-status{margin:24vh auto;text-align:center;color:var(--muted)}[hidden]{display:none!important}@media(max-width:760px){.layout{grid-template-columns:1fr;min-height:calc(100vh - 120px)}.sidebar{padding:12px}.menu{grid-template-columns:repeat(auto-fit,minmax(170px,1fr))}.side-label{margin-bottom:8px}.module-frame{height:620px}.account{gap:8px;font-size:12px}.portfolio-lists{grid-template-columns:1fr}}@media(max-width:480px){.metrics{grid-template-columns:1fr}.portfolio-body{padding:14px}}
+  </style>
+</head>
+<body>
+  <header><a class="brand" href="home.html">Prep<span>AI</span></a><div class="account"><span id="user-email"></span><button id="sign-out" type="button">Sign out</button></div></header>
+  <p id="auth-status" role="status" aria-live="polite">Checking your sign-in…</p>
+  <main id="dashboard" class="layout" hidden>
+    <aside class="sidebar" aria-label="Dashboard components">
+      <div class="side-label">Components</div>
+      <nav class="menu" aria-label="Component menu">
+        <a class="active" href="quiz.html?embedded=1" target="component-view" data-title="MCQ Generation" data-description="Choose a topic to begin"><span class="menu-icon" aria-hidden="true">✦</span><span>MCQ Generation</span></a>
+        <a href="resume-analyzer.html?embedded=1" target="component-view" data-title="Resume Analyzer" data-description="Check your resume against a target role"><span class="menu-icon" aria-hidden="true">▤</span><span>Resume Analyzer</span></a>
+      </nav>
+    </aside>
+    <div class="dashboard-content">
+      <section class="workspace" aria-label="Selected component">
+        <div class="workspace-heading"><h1>MCQ Generation</h1><span>Choose a topic to begin</span></div>
+        <iframe class="module-frame" id="component-view" name="component-view" title="MCQ Generation" src="quiz.html?embedded=1"></iframe>
+      </section>
+      <section class="portfolio" aria-labelledby="portfolio-title">
+        <div class="portfolio-heading"><h2 id="portfolio-title">Performance portfolio</h2><span id="portfolio-user">Saved on this device</span></div>
+        <div class="portfolio-body">
+          <div class="metrics" aria-label="Performance summary">
+            <div class="metric"><span class="metric-label">Practice sessions</span><strong class="metric-value" id="metric-sessions">0</strong></div>
+            <div class="metric"><span class="metric-label">Average score</span><strong class="metric-value" id="metric-average">—</strong></div>
+            <div class="metric"><span class="metric-label">Best score</span><strong class="metric-value" id="metric-best">—</strong></div>
+          </div>
+          <div class="portfolio-lists">
+            <section><h3>By component</h3><div class="portfolio-list" id="component-list"></div></section>
+            <section><h3>Recent practice</h3><div class="portfolio-list" id="recent-list"></div></section>
+          </div>
+        </div>
+      </section>
+    </div>
+  </main>
+  <footer>PrepAI · Interview practice workspace</footer>
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+  <script src="script.js"></script>
+  <script src="performance.js"></script>
+  <script>
+    let signedInUserId = null;
+    function addPortfolioRow(container, label, value) {
+      const row = document.createElement("div");
+      row.className = "portfolio-row";
+      const name = document.createElement("span"); name.textContent = label;
+      const result = document.createElement("span"); result.textContent = value;
+      row.append(name, result); container.append(row);
+    }
+    function renderPortfolio() {
+      const records = window.PrepAIPerformance.list(signedInUserId);
+      const componentList = document.getElementById("component-list");
+      const recentList = document.getElementById("recent-list");
+      componentList.replaceChildren(); recentList.replaceChildren();
+      document.getElementById("metric-sessions").textContent = String(records.length);
+      if (!records.length) {
+        document.getElementById("metric-average").textContent = "—";
+        document.getElementById("metric-best").textContent = "—";
+        componentList.innerHTML = '<p class="empty-portfolio">Complete a practice session to start your portfolio.</p>';
+        recentList.innerHTML = '<p class="empty-portfolio">Your completed sessions will appear here.</p>';
+        return;
+      }
+      const percentages = records.map(item => item.total > 0 ? item.score / item.total * 100 : 0);
+      const average = percentages.reduce((sum, value) => sum + value, 0) / percentages.length;
+      document.getElementById("metric-average").textContent = `${Math.round(average)}%`;
+      document.getElementById("metric-best").textContent = `${Math.round(Math.max(...percentages))}%`;
+      const groups = new Map();
+      for (const item of records) {
+        const group = groups.get(item.component) || { attempts: 0, points: 0 };
+        group.attempts++; group.points += item.total > 0 ? item.score / item.total * 100 : 0;
+        groups.set(item.component, group);
+      }
+      for (const [component, group] of groups) addPortfolioRow(componentList, component, `${group.attempts} sessions · ${Math.round(group.points / group.attempts)}% avg`);
+      for (const item of records.slice(0, 5)) {
+        const date = new Date(item.completedAt);
+        const when = Number.isNaN(date.getTime()) ? "" : date.toLocaleDateString();
+        addPortfolioRow(recentList, `${item.topic} · ${item.component}${when ? ` · ${when}` : ""}`, `${item.score}/${item.total}`);
+      }
+    }
+    (async function requireSignedInUser() {
+      const status = document.getElementById("auth-status");
+      try {
+        const { data, error } = await supabaseClient.auth.getSession();
+        if (error) throw error;
+        if (!data.session) { window.location.replace("auth.html#login"); return; }
+        signedInUserId = data.session.user.id;
+        document.getElementById("user-email").textContent = data.session.user.email || "Signed in";
+        renderPortfolio();
+        status.hidden = true;
+        document.getElementById("dashboard").hidden = false;
+        supabaseClient.auth.onAuthStateChange((event, session) => {
+          if (event !== "INITIAL_SESSION" && !session) window.location.replace("auth.html#login");
+        });
+      } catch (error) {
+        console.error("Could not verify sign-in:", error);
+        status.innerHTML = 'Could not verify your sign-in. <a href="auth.html#login">Log in again</a>.';
+      }
+    })();
+    window.addEventListener("message", event => {
+      const frame = document.getElementById("component-view");
+      if (event.origin !== window.location.origin || event.source !== frame.contentWindow) return;
+      if (event.data && event.data.type === "prepai:performance-updated") renderPortfolio();
+    });
+    document.querySelectorAll('.menu a[target="component-view"]').forEach(link => {
+      link.addEventListener("click", () => {
+        document.querySelectorAll('.menu a[target="component-view"]').forEach(item => item.classList.toggle("active", item === link));
+        document.querySelector(".workspace-heading h1").textContent = link.dataset.title;
+        document.querySelector(".workspace-heading span").textContent = link.dataset.description;
+        document.getElementById("component-view").title = link.dataset.title;
+      });
+    });
+    document.getElementById("sign-out").addEventListener("click", async () => {
+      const button = document.getElementById("sign-out");
+      button.disabled = true;
+      const { error } = await supabaseClient.auth.signOut();
+      if (error) { console.error("Could not sign out:", error); button.disabled = false; return; }
+      window.location.replace("auth.html#login");
+    });
+  </script>
+</body>
+</html>
